@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -16,9 +17,7 @@ import com.example.myapplication.networking.LilyApi
 import com.example.myapplication.networking.LilyApiService
 import com.example.myapplication.networking.Post
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var allPosts: MutableList<Post>
@@ -55,7 +54,7 @@ class MainActivity : AppCompatActivity() {
                 })
             dialogBuilder.show()
         }
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launch(exceptionHandler) {
             mRecyclerView = findViewById<RecyclerView>(R.id.recycler_view)
             mRecyclerView.addItemDecoration(
                 DividerItemDecoration(
@@ -66,7 +65,10 @@ class MainActivity : AppCompatActivity() {
             mRecyclerView.setHasFixedSize(true)
             refreshData()
         }
+    }
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Toast.makeText(applicationContext, "Got exception. Is the server running?", Toast.LENGTH_LONG).show()
     }
 
     suspend fun savePost(title: String, description: String) {
